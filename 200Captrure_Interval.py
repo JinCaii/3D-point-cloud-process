@@ -1,29 +1,37 @@
-#每隔1s自动拍照
-#用于从3D中读取2D信息
+#每隔200ms自动拍照
+#用于从3D中读取2D信息，continuous Motion
+#不一定需要，因为目前的方案是连续采集并提取关键帧
 import zivid
 import time
 from datetime import datetime
 from pathlib import Path
+import zivid.experimental.calibration #获取相机内参
 
 
 # 参数设置
-INTERVAL = 1  # 采集启动间隔，单位：秒
-SAVE_DIR = Path(r"C:\Users\User\Desktop\zivid_captures")
+INTERVAL = 0.2  # 采集启动间隔，单位：秒
+SAVE_DIR = Path(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
 
 # 创建保存文件夹
-SAVE_DIR.mkdir(parents=True, exist_ok=True)
+SAVE_DIR.mkdir(parents=True, exist_ok=True) #上级文件夹不存在也可以创建，若已存在文件夹也不报错
 
 
 # 初始化 Zivid 相机
 app = zivid.Application()
 camera = app.connect_camera()
 
-# 加载在Zivid Studio中导出的采集设置文件yaml
-# 修改YAML路径
+# 加载在zivid Studio中导出的采集设置文件yaml
+# 修改yaml路径
 settings = zivid.Settings.load(
-    r"C:\Users\User\Desktop\3Dsettings.yml"
+    r"C:\Users\Jin Cai\Desktop\captures_continuousMotion\3Dsettings.yml" 
 )
 
+#获取并保存3D采集对应的相机内参
+intrinsics = zivid.experimental.calibration.intrinsics(camera, settings)
+intrinsics_path = SAVE_DIR / "intrinsics_3d.yml"
+intrinsics.save(str(intrinsics_path))
+
+print(f"Camera intrinsics saved: {intrinsics_path}")
 print("Zivid camera connected!")
 print("Start capturing every 1s")
 #Press Ctrl+C to stop
@@ -57,8 +65,6 @@ try:#尝试执行的代码
         zdf_filename = SAVE_DIR / f"{count:03d}.zdf"#保存的文件名为3位，不足的地方用0补齐，如000，001，002
         frame.save(str(zdf_filename))
          
-        
-
         #保存为ply文件
         ply_filename = SAVE_DIR / f"{count:03d}.ply"
         frame.save(str(ply_filename))
