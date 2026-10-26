@@ -1,7 +1,8 @@
+#直连zivid相机，用于测试
 #使用 Zivid SDK 2.11 和 OpenCV 检测 ArUco 标记并估计位姿。
-
-# 依赖：与本机 Zivid SDK 匹配的 zivid Python 包、numpy、opencv-contrib-python。
-# 运行：python aruco_3D_detection.py
+#从3D图像中读取2D图像
+#用于continuous Motion
+#没有用点云的xyz或深度图来计算相机位姿，而是从3D采集结果里取出2D彩色图
 
 
 import sys
@@ -13,57 +14,63 @@ import zivid.experimental.calibration
 
 
 def main():
-    #连接相机并显示实时检测结果；平移向量的单位为米。
+    #初始化aruco detector
     dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
     parameters = cv2.aruco.DetectorParameters()
     detector = cv2.aruco.ArucoDetector(dictionary, parameters)
 
-    # Application 必须在连接和采集期间保持存活。
+    #连接zivid相机
     with zivid.Application() as app:
         print("Connecting to Zivid camera...")
         with app.connect_camera() as camera:
             print(f"Connected: {camera.info}")
 
-            settings = zivid.Settings(
+            settings = zivid.Settings(    #采集3D图像
                 acquisitions=[zivid.Settings.Acquisition()]
             )
+            #获取相机内参和畸变系数
             intrinsics = zivid.experimental.calibration.intrinsics(camera, settings)
             matrix = intrinsics.camera_matrix
             distortion = intrinsics.distortion
+
+            #构造内参矩阵
             camera_matrix = np.array(
                 [[matrix.fx, 0.0, matrix.cx],
                  [0.0, matrix.fy, matrix.cy],
                  [0.0, 0.0, 1.0]],
                 dtype=np.float64,
             )
+
+            #畸变系数5*1向量
             dist_coeffs = np.array(
                 [distortion.k1, distortion.k2, distortion.p1,
                  distortion.p2, distortion.k3],
                 dtype=np.float64,
             ).reshape(5, 1)
 
+            #创建图像显示窗口
             window_name = "ArUco Detection"
             cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(window_name, 800, 600)
 
-            aruco_length = 0.03
+            #定义aruco的真实三维坐标
+            aruco_length = 0.03    
             half_length = aruco_length / 2.0
-            # 以中心为原点，按左上、右上、右下、左下排列。
-            # 顺序与检测角点和 SOLVEPNP_IPPE_SQUARE 的要求一致。
+            #角点顺序和SOLVEPNP_IPPE_SQUARE的要求一致。
             object_points = np.array(
-                [[-half_length, half_length, 0.0],
-                 [half_length, half_length, 0.0],
-                 [half_length, -half_length, 0.0],
-                 [-half_length, -half_length, 0.0]],
+                [[-half_length, half_length, 0.0],    #左上
+                 [half_length, half_length, 0.0],     #右上
+                 [half_length, -half_length, 0.0],    #右下
+                 [-half_length, -half_length, 0.0]],  #左下
                 dtype=np.float32,
             )
 
             while True:
+                #调用zivid进行一次3D采集
                 with camera.capture(settings) as captured_frame:
-                    bgra = captured_frame.point_cloud().copy_data("bgra")
-                    # 生成独立 BGR 图像，不修改 SDK 图像数据。
-                    frame = cv2.cvtColor(bgra, cv2.COLOR_BGRA2BGR)
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    bgra = captured_frame.point_cloud().copy_data("bgra")  #从3D点云中读取bgra并复制到numpy数组中。
+                    frame = cv2.cvtColor(bgra, cv2.COLOR_BGRA2BGR)  #bgra转换为bgr图像，frame用于后续绘制边框、坐标轴等
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  #bgr再转为灰度图
                 marker_corners, marker_ids, _ = detector.detectMarkers(gray)
                 detected_count = 0 if marker_ids is None else len(marker_ids)
 
