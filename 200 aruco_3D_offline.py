@@ -11,6 +11,7 @@
 
 import sys
 from pathlib import Path  #用于读取本地图像文件
+import yaml #用于读取内参yml文件
 
 import cv2
 import numpy as np
@@ -19,6 +20,8 @@ import zivid.experimental.calibration  #读取zivid相机内参
 
 
 def main():
+    app = zivid.Application()  #初始化zivid sdk
+
    #初始化aruco detector
     dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)  #选择aruco字典，编码0~249
     parameters = cv2.aruco.DetectorParameters()  #使用openCV默认的aruco检测参数
@@ -26,57 +29,64 @@ def main():
 
     #从文件夹captures_continuousMotion中读取zdf文件以及相机内参intrinsics_3d.yml
     #见open3D_tutorial 200Caputre_interval.py的第13行
-    folder = Path(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
-    image_files = sorted(folder.glob("*.zdf")) #查找所有的zdf文件并排序
+    # folder = Path(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
+    # image_files = sorted(folder.glob("*.zdf")) #查找所有的zdf文件并排序
 
 
     #若从关键帧文件夹keyframe里读取
-    # #原始采集文件夹
-    # folder = Path(
-    #     r"C:\Users\Jin Cai\Desktop\captures_continuousMotion"
-    # )
+    #原始采集文件夹
+    folder = Path( r"C:\Users\User\Desktop\captures_continuousMotion")
 
-    # #关键帧文件夹
-    # keyframe_folder = folder / "keyframe"
+    #关键帧文件夹
+    keyframe_folder = folder / "keyframe"
 
-    # #只读取筛选出的关键帧ZDF文件
-    # image_files = sorted(keyframe_folder.glob("*.zdf"))
+    #只读取筛选出的关键帧ZDF文件
+    image_files = sorted(keyframe_folder.glob("*.zdf"))
 
     if not image_files:  #若没找到
-        raise FileNotFoundError("No png files found, please check the path!")
+        raise FileNotFoundError("No zdf files found, please check the path!")
 
 
     # 读取之前保存的相机内参
-    intrinsics = zivid.experimental.calibration.CameraIntrinsics.load(
-        str(folder / "intrinsics_3d.yml")   #绝对路径
-    )
-    # 提取相机内参
-    fx = intrinsics.camera_matrix.fx
-    fy = intrinsics.camera_matrix.fy
-    cx = intrinsics.camera_matrix.cx
-    cy = intrinsics.camera_matrix.cy
+    # intrinsics = zivid.CameraIntrinsics.load(
+    #     str(folder / "intrinsics_3d.yml")   #绝对路径
+    # )
 
-    # 转换为OpenCV相机内参矩阵
+    #读取之前保存的相机内参
+    with open(folder / "intrinsics_3d.yml", "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    
+    #提取相机内参
+    camera_data = data["CameraIntrinsics"]
+    matrix = camera_data["CameraMatrix"]
+    dist = camera_data["Distortion"]
+    
+    fx = matrix["FX"]
+    fy = matrix["FY"]
+    cx = matrix["CX"]
+    cy = matrix["CY"]
+
+    # 转换为 OpenCV 相机内参矩阵
     camera_matrix = np.array(
         [[fx, 0, cx],
-         [0, fy, cy],
-         [0, 0, 1]], 
-        dtype=np.float64)
-
-    #提取畸变系数
-    dist = intrinsics.distortion
-
+        [0, fy, cy],
+        [0, 0, 1]],
+        dtype=np.float64
+    )
+    
+    # 转换为 OpenCV 畸变系数
     dist_coeffs = np.array(
-        [dist.k1,
-         dist.k2,
-         dist.p1,
-         dist.p2,
-         dist.k3], 
-        dtype=np.float64)
-
+        [dist["K1"],
+        dist["K2"],
+        dist["P1"],
+        dist["P2"],
+        dist["K3"]],
+    dtype=np.float64
+        )
+    
     print("相机内参矩阵：")
     print(camera_matrix)
-
+    
     print("畸变系数：")
     print(dist_coeffs)        
             
@@ -86,7 +96,7 @@ def main():
     cv2.resizeWindow(window_name, 800, 600) #窗口大小为800*600，与分辨率无关
 
     #定义aruco的真实三维坐标
-    aruco_length = 0.03   #这里的边长为0.03m，自己修改
+    aruco_length = 0.1   #这里的边长为0.1m，自己修改
     half_length = aruco_length / 2.0
     #角点的顺序和SOLVEPNP_IPPE_SQUARE的要求一致
     object_points = np.array(

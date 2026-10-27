@@ -19,6 +19,6 @@ with zivid.Application() as app:
         intrinsics = calibration.estimate_intrinsics(frame)
 
         #保存为yml文件
-        intrinsics.save(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion\intrinsics_3D.yml")
+        intrinsics.save(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion\intrinsics_3d.yml")
 
         print("Camera intrinsics saved!")

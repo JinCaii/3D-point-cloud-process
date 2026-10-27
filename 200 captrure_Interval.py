@@ -63,11 +63,11 @@ try:#尝试执行的代码
         capture_duration = time.perf_counter() - start #当前计时器时间-开始计时器时间
 
         # 保存为 zdf文件
-        zdf_filename = SAVE_DIR / f"{count:03d}.zdf"#保存的文件名为3位，不足的地方用0补齐，如000，001，002
+        zdf_filename = SAVE_DIR / f"capture_{count:03d}.zdf"#保存的文件名为3位，不足的地方用0补齐，如capture_000，capture_001，capture_002
         frame.save(str(zdf_filename))
          
         #保存为ply文件
-        ply_filename = SAVE_DIR / f"{count:03d}.ply"
+        ply_filename = SAVE_DIR / f"capture_{count:03d}.ply"
         frame.save(str(ply_filename))
 
 
