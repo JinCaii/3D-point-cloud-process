@@ -10,7 +10,7 @@ import zivid.experimental.calibration #获取相机内参
 
 #参数设置
 INTERVAL = 0.4  # 采集启动间隔，单位：秒
-SAVE_DIR = Path(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
+SAVE_DIR = Path(r"C:\Users\User\Desktop\captures_continuousMotion")
 
 #创建保存文件夹
 SAVE_DIR.mkdir(parents=True, exist_ok=True) #上级文件夹不存在也可以创建，若已存在文件夹也不报错
@@ -24,7 +24,7 @@ print(f"Connected: {camera.info}")
 
 #加载在zivid Studio中导出的采集设置文件yml
 settings = zivid.Settings.load(
-     r"C:\Users\Jin Cai\Desktop\captures_continuousMotion\settings.yml" 
+     r"C:\Users\User\Desktop\captures_continuousMotion\settings.yml" 
  )
 
 # #获取并保存3D采集对应的相机内参

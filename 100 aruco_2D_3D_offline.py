@@ -125,6 +125,24 @@ def main():
                 print(f"rvec: {rvec.ravel()}")      #打印计算出的旋转向量
                 print(f"tvec (m): {tvec.ravel()}")  #打印计算出的平移向量
 
+                #将旋转向量转换为3×3旋转矩阵
+                R, _ = cv2.Rodrigues(rvec)
+                T_marker_to_camera = np.eye(4, dtype=np.float64) #构建4x4齐次变换阵
+                T_marker_to_camera[:3, :3] = R  #左上角3×3填入旋转矩阵
+                T_marker_to_camera[:3, 3] = tvec.flatten() #最后一列填入平移向量
+                
+                print(T_marker_to_camera)
+                
+                #创建保存矩阵的文件夹
+                matrix_folder = folder / "transformation_matrices"
+                matrix_folder.mkdir(exist_ok=True)
+                matrix_path = matrix_folder / f"{image_path.stem}_marker_{marker_id}.npy"   #设置保存的文件名
+                np.save(matrix_path, T_marker_to_camera)  #保存变换阵
+                print(f"Matrix saved to: {matrix_path}")
+                
+                #这里的变换阵是marker -> camera，后续可能需要camera -> marker，则求逆
+                #T_camera_to_marker = np.linalg.inv(T_marker_to_camera)
+
                 #绘制坐标轴，红色x，绿色y，蓝色z，坐标轴的长度为0.1m
                 cv2.drawFrameAxes(  
                     frame, 
@@ -140,9 +158,9 @@ def main():
             frame, f"DICT_4X4_250 | Detected: {detected_count}",
             (10, 25), 
             cv2.FONT_HERSHEY_SIMPLEX, 
-            0.6, 
+            0.6,    #字体大小
             (0, 255, 0), 
-            2,
+            2,      #字体粗细
         )
 
         #显示当前图像文件名
