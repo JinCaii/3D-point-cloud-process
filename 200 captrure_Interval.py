@@ -8,33 +8,34 @@ from pathlib import Path
 import zivid.experimental.calibration #获取相机内参
 
 
-# 参数设置
-INTERVAL = 0.2  # 采集启动间隔，单位：秒
+#参数设置
+INTERVAL = 0.4  # 采集启动间隔，单位：秒
 SAVE_DIR = Path(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
 
-# 创建保存文件夹
+#创建保存文件夹
 SAVE_DIR.mkdir(parents=True, exist_ok=True) #上级文件夹不存在也可以创建，若已存在文件夹也不报错
 
 
-# 初始化 Zivid 相机
+#初始化 Zivid 相机
 app = zivid.Application()
+print("Connecting to Zivid camera...")
 camera = app.connect_camera()
+print(f"Connected: {camera.info}")
 
-# 加载在zivid Studio中导出的采集设置文件yaml
-# 修改yaml路径
+#加载在zivid Studio中导出的采集设置文件yml
 settings = zivid.Settings.load(
-    r"C:\Users\Jin Cai\Desktop\captures_continuousMotion\3Dsettings.yml" 
-)
+     r"C:\Users\Jin Cai\Desktop\captures_continuousMotion\settings.yml" 
+ )
 
-#获取并保存3D采集对应的相机内参
-intrinsics = zivid.experimental.calibration.intrinsics(camera, settings)
-intrinsics_path = SAVE_DIR / "intrinsics_3d.yml"
-intrinsics.save(str(intrinsics_path))
+# #获取并保存3D采集对应的相机内参
+# intrinsics = zivid.experimental.calibration.intrinsics(camera, settings)
+# intrinsics_path = SAVE_DIR / "intrinsics_3d.yml"
+# intrinsics.save(str(intrinsics_path))
 
-print(f"Camera intrinsics saved: {intrinsics_path}")
-print("Zivid camera connected!")
-print("Start capturing every 1s")
-#Press Ctrl+C to stop
+# print(f"Camera intrinsics saved: {intrinsics_path}")
+# print("Zivid camera connected!")
+# print("Start capturing every 1s")
+
 
 
 # 定时采集

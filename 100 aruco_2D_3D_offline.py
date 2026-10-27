@@ -22,9 +22,9 @@ def main():
     parameters = cv2.aruco.DetectorParameters()  #使用openCV默认的aruco检测参数
     detector = cv2.aruco.ArucoDetector(dictionary, parameters)  #创建检测器，调用字典和参数
 
-    #从文件夹captures_stop_and_go中读取图像以及yml
+    #从文件夹captures_stop_and_go中读取图像以及相机内参intrinsics_2d.yml
     #见open3D_tutorial 100Caputre_2D_3D.py的第12行
-    folder = Path("captures_stop_and_go")
+    folder = Path(r"C:\Users\Jin Cai\Desktop\captures_stop_and_go")
     image_files = sorted(folder.glob("capture_*.png")) #查找所有.png图像，并按文件名排序
    
     if not image_files:  #若没找到

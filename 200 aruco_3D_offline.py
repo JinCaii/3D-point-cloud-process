@@ -24,7 +24,7 @@ def main():
     parameters = cv2.aruco.DetectorParameters()  #使用openCV默认的aruco检测参数
     detector = cv2.aruco.ArucoDetector(dictionary, parameters)  #创建检测器，调用字典和参数
 
-    #从文件夹captures_continuousMotion中读取zdf文件以及yml
+    #从文件夹captures_continuousMotion中读取zdf文件以及相机内参intrinsics_3d.yml
     #见open3D_tutorial 200Caputre_interval.py的第13行
     folder = Path(r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
     image_files = sorted(folder.glob("*.zdf")) #查找所有的zdf文件并排序

@@ -3,6 +3,7 @@
 #该程序实现了按一下enter自动采集一次2D和3D图像，无需手动切换
 #采集时保存相机内参，用于后续aruco相机位姿估计
 
+#连接相机前要先在studio断开连接
 
 from pathlib import Path
 import zivid
@@ -14,7 +15,9 @@ output.mkdir(parents=True, exist_ok=True)
 
 #连接zivid相机
 app = zivid.Application()
+print("Connecting to Zivid camera...")
 camera = app.connect_camera()
+print(f"Connected: {camera.info}")
 
 #加载独立的2D和3D拍摄参数
 settings_2d = zivid.Settings2D.load( r"C:\Users\Jin Cai\Desktop\captures_stop_and_go\settings2D.yml") #自己更改路径
@@ -22,18 +25,18 @@ settings_3d = zivid.Settings.load( r"C:\Users\Jin Cai\Desktop\captures_stop_and_
 
 #获取并保存2D相机内参，用于后续arUco位姿估计
 #输出是intrinsics_2d.yml，和拍摄的图像保存在同一个文件夹中
-intrinsics_2d = zivid.experimental.calibration.intrinsics(
-    camera, settings_2d
-)
-intrinsics_2d.save(str(output / "intrinsics_2d.yml"))
-print("2D相机内参已保存！")
+# intrinsics_2d = zivid.experimental.calibration.intrinsics(
+#     camera, settings_2d
+# )
+# intrinsics_2d.save(str(output / "intrinsics_2d.yml"))
+# print("2D相机内参已保存！")
 
-# 获取并保存3D拍摄对应的相机内参
-intrinsics_3d = zivid.experimental.calibration.intrinsics(
-    camera, settings_3d
-)
-intrinsics_3d.save(str(output / "intrinsics_3d.yml"))
-print("3D拍摄对应的相机内参已保存！")
+# # 获取并保存3D拍摄对应的相机内参
+# intrinsics_3d = zivid.experimental.calibration.intrinsics(
+#     camera, settings_3d
+# )
+# intrinsics_3d.save(str(output / "intrinsics_3d.yml"))
+# print("3D拍摄对应的相机内参已保存！")
 
 
 
@@ -50,7 +53,7 @@ while True:
 
     # 独立采集2D图像，不是从3D图像中获取2D图像
     frame_2d = camera.capture(settings_2d) #用提前设置的2D参数
-    image = frame_2d.image_rgba_srgb()
+    image = frame_2d.image_rgba()
     image.save(str(output / f"capture_{count:03d}.png"))  #文件名capture_001.png
 
     #设置投影仪亮度为0，则切换之间无需等待
