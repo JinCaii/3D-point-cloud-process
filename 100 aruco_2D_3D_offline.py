@@ -25,7 +25,7 @@ def main():
 
     #从文件夹captures_stop_and_go中读取图像以及相机内参intrinsics_2d.yml
     #见open3D_tutorial 100Caputre_2D_3D.py的第12行
-    folder = Path(r"C:\Users\User\Desktop\captures_stop_and_go")
+    folder = Path(r"C:\Users\Jin Cai\Desktop\captures_stop_and_go")
     image_files = sorted(folder.glob("capture_*.png")) #查找所有.png图像，并按文件名排序
    
     if not image_files:  #若没找到
@@ -158,7 +158,7 @@ def main():
             frame, f"DICT_4X4_250 | Detected: {detected_count}",
             (10, 25), 
             cv2.FONT_HERSHEY_SIMPLEX, 
-            0.6,    #字体大小
+            1,    #字体大小
             (0, 255, 0), 
             2,      #字体粗细
         )
@@ -169,9 +169,9 @@ def main():
             image_path.name,
             (10,50),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
+            1,
             (0,255,0),
-            1
+            2
         )
 
         #显示操作提示
@@ -180,9 +180,9 @@ def main():
             "Any key: next | Q / Esc: exit",
             (10, 75),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
+            1,
             (0, 255, 0),
-            1
+            2
         )
         
         #显示检测结果

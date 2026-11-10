@@ -35,7 +35,7 @@ def main():
 
     #若从关键帧文件夹keyframe里读取
     #原始采集文件夹
-    folder = Path( r"C:\Users\User\Desktop\captures_continuousMotion")
+    folder = Path( r"C:\Users\Jin Cai\Desktop\captures_continuousMotion")
 
     #关键帧文件夹
     keyframe_folder = folder / "keyframe"

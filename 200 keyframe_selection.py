@@ -9,7 +9,7 @@ import zivid
 
 #读取zdf图像的路径，即之前相机拍摄保存下来的
 folder = Path(
-    r"C:\Users\User\Desktop\captures_continuousMotion"
+    r"C:\Users\Jin Cai\Desktop\captures_continuousMotion"
 )
 
 #创建keyframe文件夹，用于保存筛选结果
@@ -65,12 +65,18 @@ with zivid.Application():   #不是用来连接相机的，而是为离线读取
         height, width = image.shape[:2]
 
         #计算图像中心，作为reference
-        image_center = np.array([
-            width / 2,
-            height / 2
-        ])
+        image_center_y = height / 2
 
-        #读取marker的id的角点
+
+        #测试
+        cv2.imwrite("test_marker.png", image)
+
+        print("Image shape:", image.shape)
+        print("Image dtype:", image.dtype)
+        print("Image min/max:", image.min(), image.max())
+
+
+        #读取marker的id和角点
         corners, ids, rejected = detector.detectMarkers(image)
 
         #若没读取到
@@ -88,13 +94,13 @@ with zivid.Application():   #不是用来连接相机的，而是为离线读取
             #获取marker四个角点的像素坐标
             points = marker_corners.reshape(4, 2)
 
-            #计算marker中心  也可能是只计算width
-            marker_center = np.mean(points, axis=0)
+            #计算marker中心的y坐标
+            marker_center_y = np.mean(points[:, 1])
 
-            #计算marker中心到图像中心的距离，这里是欧式距离
-            distance = np.linalg.norm(
-                marker_center - image_center
-            )
+            #只考虑y方向与图像中心的距离
+            distance = abs(
+            marker_center_y - image_center_y
+        )
 
             #如果当前marker id没有记录，或者当前帧的中心距离更小，则更新记录
             if (
@@ -159,7 +165,7 @@ with open(
     writer.writerow([
         "Marker ID",
         "Best ZDF",
-        "Center Distance (px)"
+        "Y Center Distance (px)"
     ])
 
     #每个marker对应一行
