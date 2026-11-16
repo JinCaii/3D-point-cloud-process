@@ -1,3 +1,5 @@
+#评估初始配准后的平面是否互相平行
+#也是以capture 001为参考
 import csv
 from pathlib import Path
 

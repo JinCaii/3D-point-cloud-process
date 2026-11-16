@@ -1,4 +1,5 @@
-
+#对经过预处理后、配准前的四个平面分别进行拟合
+#以capture001为参考，判断不同平面间法向量的差异（即是否互相平行）
 import open3d as o3d
 import numpy as np
 import copy
