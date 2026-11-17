@@ -2,10 +2,12 @@
 #单独用2D图像做位姿估计
 #用于stop-and-go
 #按任意键显示下一张图片，按q或esc退出
+#得到的是marker->camera的变换阵，会以numpy的形式保存到transformation_matrices文件夹里
 #use Zivid SDK 2.11 and OpenCV to do marder detection and pose estimation
 #use only 2D images to do pose estimation
 #for stop-and-go
 #press any key to display the next image, or press Q or Esc to exit
+#obtain the marker-to-camera transformation matrix and save it as numpy in the transformation_matrices folder
 
 #注意：
 #要修改的参数：22行aruco字典dictionary，74行aruco边长aruco_length
@@ -123,8 +125,8 @@ def main():
         #if there are two or more markers in one image
         #only use the marker with smallest id to estimate pose
         if marker_ids is not None:
-            min_idx = np.argmin(marker_ids.flatten())   #找到最小ID对应的索引       #find the index of the marker with the smallest ID
-            marker_corners = [marker_corners[min_idx]]  #只保留该marker的四个角点   #keep only the four corners of this marker
+            min_idx = np.argmin(marker_ids.flatten())   #找到最小ID对应的索引        #find the index of the marker with the smallest ID
+            marker_corners = [marker_corners[min_idx]]  #只保留该marker的四个角点    #keep only the four corners of this marker
             marker_ids = marker_ids[min_idx:min_idx+1]  #只保留该marker的ID         #keep only the id of this marker
         detected_count = 0 if marker_ids is None else len(marker_ids)
 

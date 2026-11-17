@@ -22,7 +22,7 @@ output_matrix_folder.mkdir(parents=True, exist_ok=True)
 #All distances are in mm because the input PLY coordinates are in mm.
 
 max_correspondence_distance = 5
-max_iterations = 100
+max_iterations = 30
 
 #Normal estimation parameters (mm)
 normal_radius = 10.0

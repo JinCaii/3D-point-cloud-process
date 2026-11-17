@@ -102,17 +102,54 @@ for i in range(1, 4):   #遍历剩下3个capture #iterate through the remaining 
 
     #计算source -> 全局坐标系的变换矩阵
     #calculate the transformation matrix from source to the global coordinate system
-    T_source_to_global = (
-        T_C1_M8
-        @ T_M8_Mi  #@表示矩阵乘法  #@ is matrix multiplication
-        @ np.linalg.inv(marker_matrices[i]) #逆矩阵，得到相机相对于marker的位姿 #invert the matrix to get the camera pose relative to the marker
-    )
+    # T_source_to_global = (
+    #     T_C1_M8
+    #     @ T_M8_Mi  #@表示矩阵乘法  #@ is matrix multiplication
+    #     @ np.linalg.inv(marker_matrices[i]) #逆矩阵，得到相机相对于marker的位姿 #invert the matrix to get the camera pose relative to the marker
+    # )
+    #T_source_to_global[:3, 3] *= 1000.0  
+
+    #测试：旋转部分改为单位阵
+    # T_source_to_global = (
+    # T_C1_M8
+    # @ T_M8_Mi
+    # @ np.linalg.inv(marker_matrices[i])
+    # )
+
+    # Remove the rotation component
+    # T_source_to_global[:3, :3] = np.eye(3)
+    #T_source_to_global[:3, 3] *= 1000.0  
+
+    #测试：用marker中心位置计算平移
+    # Marker 8 pose in Capture 001
+    R1 = T_C1_M8[:3, :3]
+    t1 = T_C1_M8[:3, 3]
+
+    # Current marker pose in Capture i
+    ti = marker_matrices[i][:3, 3]
+
+    # Known marker displacement in marker 8 coordinates (m)
+    di = np.array([
+        marker_x_positions[i],
+        0.0,
+        0.0
+    ], dtype=np.float64)
+
+    # Predicted position of marker i in Capture 001
+    predicted_marker_position = t1 + R1 @ di
+
+    # Pure translation from Capture i to Capture 001
+    translation = predicted_marker_position - ti
+
+    # Construct 4x4 pure translation matrix
+    T_source_to_global = np.eye(4, dtype=np.float64)
+    T_source_to_global[:3, 3] = translation * 1000.0
 
     #marker位姿矩阵的平移单位为m，而zivid ply的单位是mm，这里将m转换成mm
     #[:3, 3]中:3转换第0，1，2行，第二个3表示第3列，即只转换平移部分
     #the translation components of the marker pose matrices are in meters, while Zivid PLY point clouds use millimeters. Convert meters to millimeters here
     #[:3, 3], :3 selects rows 0, 1, and 2, while the second 3 selects column 3. i.e. only the translation components are converted
-    T_source_to_global[:3, 3] *= 1000.0  
+   
 
     #保存当前变换矩阵到列表global_transforms
     #append the current transformation matrix to the global_transforms list
